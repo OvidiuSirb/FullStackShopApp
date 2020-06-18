@@ -1,0 +1,6 @@
+<!-- naming convention with underscore to know that this is a partial file not a file that's being rendered from the server -->
+<label>Name</label>
+
+<!-- the name is how our server gets the data from the object; when getting it back from the server we could call body.name -->
+<!-- = tells the server to put the text inside as html to the page -->
+<input type="text" name="name" value="<%= author.name %>">
