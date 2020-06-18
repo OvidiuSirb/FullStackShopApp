@@ -7,9 +7,11 @@ const express = require('express')
 //get the app portion by calling this function of Express
 const app = express()
 const expressLayouts= require('express-ejs-layouts')
+const bodyParser = require('body-parser')
 
 
 const indexRouter = require('./routes/index')
+const authorRouter = require('./routes/authors')
 
 //configuring our Express application
 //set our view engine
@@ -21,6 +23,7 @@ app.set('views',__dirname + '/views')
 app.set('layout', 'layouts/layout')
 app.use(expressLayouts)
 app.use(express.static('public'))   //where we put our HTML, JS, CSS, images,etc; folder with all of our public views
+app.use(bodyParser.urlencoded({limit:'10mb', extended: false}))      //increasing the limit that our server can accept useful for uploading files to our server
 
 //setting up our database
 const mongoose = require('mongoose')
@@ -34,6 +37,7 @@ db.once('open', () => console.log('Connected to Mongoose'))
  
 
 app.use('/', indexRouter)
+app.use('/authors',authorRouter)
 
 app.listen(process.env.PORT || 3000) //pulled from an environment variable for when we deploy the server is going to tell us what port it is listening to; not us but for development were just going to default this to port 3000 since the server is not telling us anything for our hosting platform
 
