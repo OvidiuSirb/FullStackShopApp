@@ -1,2 +1,7 @@
 <!-- This is going to be imported from index.ejs to layout.ejs into the <% %> part -->
-Some text 
+<h2>Recently added</h2>
+<div>
+    <% books.forEach(book => { %>
+        <img height="150" width="100" src="<%= book.coverImagePath %>">
+    <% }) %>
+</div> 

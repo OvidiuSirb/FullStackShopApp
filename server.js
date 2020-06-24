@@ -12,6 +12,7 @@ const bodyParser = require('body-parser')
 
 const indexRouter = require('./routes/index')
 const authorRouter = require('./routes/authors')
+const bookRouter = require('./routes/books')
 
 //configuring our Express application
 //set our view engine
@@ -38,6 +39,7 @@ db.once('open', () => console.log('Connected to Mongoose'))
 
 app.use('/', indexRouter)
 app.use('/authors',authorRouter)
+app.use('/books',bookRouter)
 
 app.listen(process.env.PORT || 3000) //pulled from an environment variable for when we deploy the server is going to tell us what port it is listening to; not us but for development were just going to default this to port 3000 since the server is not telling us anything for our hosting platform
 
