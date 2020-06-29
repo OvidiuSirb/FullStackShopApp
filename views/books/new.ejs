@@ -1,5 +1,6 @@
 <h2>New Book</h2>
-<form action="/books" method="POST" enctype="multipart/form-data">
+<!-- removed enctype="multipart/form-data" from form because we're uploading just a single string which is a JSON object now -->
+<form action="/books" method="POST" >
     <%- include('_form_fields') %> 
     <a href="/books">Cancel</a>
     <button type="submit">Create</button>
