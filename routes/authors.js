@@ -2,6 +2,8 @@ const express=require('express')
 // const { request, response } = require('express')
 const router = express.Router()
 const Author = require('../models/author')
+const { response, request } = require('express')
+const Book = require('../models/book')
 
 //All Authors Route
 router.get('/',async (request, response) => {
@@ -38,8 +40,8 @@ router.post('/', async (request,response) =>{
         //it's going to wait for author.save to finish and it's going to populate this newAuthor variable as soon as it's done saving the author
         const newAuthor = await author.save()
         //TODO
-        // response.redirect(`authors/${newAuthor.id}`)
-        response.redirect(`authors`)
+        response.redirect(`authors/${newAuthor.id}`)
+        // response.redirect(`authors`)
     }catch{
         let locals = {
                         author: author,
@@ -68,5 +70,89 @@ router.post('/', async (request,response) =>{
     // })
     // response.send(request.body.name)
 })
+
+router.get('/:id', async (req,res) => {
+    try{
+        const author = await Author.findById(req.params.id)
+        const books = await Book.find({author: author.id}).limit(6).exec()
+        res.render('authors/show', {
+            author: author,
+            booksByAuthor: books
+        })
+    }catch(err){
+        console.log(err)
+        res.redirect('/')
+    }
+})
+
+router.get('/:id/edit', async (req,res) =>{
+    try{
+        const author = await Author.findById(req.params.id)
+        res.render('authors/edit',{author: author})       //this is going to give us acces to the author model
+    }catch{
+        res.redirect('/authors')
+    }
+
+})
+
+router.put('/:id', async (req,res) =>{
+    let author
+    try{
+        author = await Author.findById(req.params.id)
+        author.name = req.body.name
+        await author.save()
+        res.redirect(`/authors/${author.id}`)
+
+    }catch{
+        if(author == null){
+            res.redirect('/')
+        }
+        else{
+            let locals = {
+                author: author,
+                errorMessage: 'Error updating Author'
+            }
+            res.render('authors/new', locals)
+        }
+        
+    }
+})
+
+router.delete('/:id',async (req,res)=>{
+    let author
+    try{
+        author = await Author.findById(req.params.id)
+        await author.remove()
+        res.redirect(`/authors`)
+    }catch{
+        if(author == null){
+            res.redirect('/')
+        }
+        else{
+            res.redirect(`/authors/${author.id}`)
+        }
+        
+    }
+})
+
+router.post('/', async (request,response) =>{
+    const author = new Author({
+        name: request.body.name
+    })
+
+    try{
+        author = Author.findById(request.params.id)
+        await author.save()
+        response.redirect(`authors/${author.id}`)
+
+    }catch{
+        let locals = {
+                        author: author,
+                        errorMessage: 'Error creating Author'
+                    }
+        response.render('authors/new', locals)
+    }
+})
+
 
 module.exports = router

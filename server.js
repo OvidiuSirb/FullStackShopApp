@@ -8,7 +8,7 @@ const express = require('express')
 const app = express()
 const expressLayouts= require('express-ejs-layouts')
 const bodyParser = require('body-parser')
-
+const methodOverride = require('method-override')
 
 const indexRouter = require('./routes/index')
 const authorRouter = require('./routes/authors')
@@ -23,8 +23,9 @@ app.set('views',__dirname + '/views')
 //the idea behind a layout file: every single file is going to be put inside this layout file so we don't have to duplicate all of the beginning HTML and ending HTML of our projects such as the header and the footer
 app.set('layout', 'layouts/layout')
 app.use(expressLayouts)
+app.use(methodOverride('_method'))
 app.use(express.static('public'))   //where we put our HTML, JS, CSS, images,etc; folder with all of our public views
-app.use(bodyParser.urlencoded({limit:'10mb', extended: false}))      //increasing the limit that our server can accept useful for uploading files to our server
+app.use(bodyParser.urlencoded({limit:'10mb', extended: true}))      //increasing the limit that our server can accept useful for uploading files to our server
 
 //setting up our database
 const mongoose = require('mongoose')
