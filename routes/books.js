@@ -7,6 +7,7 @@ const Author = require('../models/author')
 const Book = require('../models/book')
 const { request } = require('express')
 const { render } = require('ejs')
+const e = require('express')
 // const uploadPath = path.join('public', Book.coverImageBasePath)
 const imageMimeTypes =['image/jpeg', 'image/png', 'image/gif'] //array with image types
 // destination some kind of upload path inside of our project; callback to call whenever we're done with our actual fileFilter
@@ -70,6 +71,28 @@ router.get('/new',async (request, response) => {
     renderNewPage(response, new Book())
 })
 
+//Show Book Route
+router.get('/:id', async (req,res) =>{
+    try{
+        const book = await Book.findById(req.params.id)
+            .populate('author')
+            .exec()
+        res.render('books/show', {book: book})
+    }catch{
+        res.redirect('/')
+    }
+})
+
+//Edit Book Route
+router.get('/:id/edit',async (request, response) => {
+    try{
+        const book = await Book.findById(request.params.id)
+        renderEditPage(response, book)
+    }catch{
+        response.redirect('/')
+    }
+})
+
 //Create Book Route
 // removed upload.single('cover') because we're not uploading a file, we're now getting a string & we have run 'npm uninstall multer'
 router.post('/',  async (request,response) =>{
@@ -89,7 +112,9 @@ router.post('/',  async (request,response) =>{
 
     try{
         const newBook = await book.save()
-        response.redirect('books')
+        // response.redirect('books')
+        response.redirect(`books/${newBook.id}`)
+
     }catch{
         // if(book.coverImageName != null){
         //     removeBookCover(book.coverImageName)
@@ -106,16 +131,76 @@ router.post('/',  async (request,response) =>{
 //     })
 // }
 
+//Update Book Route
+router.put('/:id',  async (request,response) =>{
+    let book
+
+    try{
+        book = await Book.findById(request.params.id)
+        book.title = request.body.title
+        book.author = request.body.author
+        book.publishDate = new Date(request.body.publishDate)
+        book.pageCount = request.body.pageCount 
+        book.description = request.body.description
+        if(request.body.cover != null && request.body.cover != ''){
+            saveCover(book, request.body.cover)
+        }
+        await book.save()
+        response.redirect(`/books/${book.id}`)
+
+    }catch(err){
+        console.log(err)
+        if(book != null){
+            renderEditPage(response, book, true)
+        }
+        else{
+            redirect('/')
+        }
+    }
+})
+
+//Delete Book page
+router.delete('/:id', async (req,res) => {
+    let book
+    try{
+        const book = await Book.findById(req.params.id)
+        await book.remove()
+        res.redirect('/books')
+    }catch{
+        if (book != null){
+            res.render('books/show',{
+                errorMessage: 'Could not remove book'
+            })
+        } else{
+            res.redirect('/')
+        }
+    }
+})
+
 async function renderNewPage(response, book, hasError = false){
+    renderFormPage(response, book, 'new', hasError)
+}
+
+
+async function renderEditPage(response, book, hasError = false){
+    renderFormPage(response, book, 'edit', hasError)
+}
+
+
+async function renderFormPage(response, book, form, hasError = false){
     try{
         const authors = await Author.find({})
-        const book = new Book()
         let locals={
             authors: authors,
             book: book
         }
-        if(hasError) locals.errorMessage = 'Error Creating Book'
-        response.render('books/new',locals)
+        if(hasError) {
+            if(form==='edit'){
+                locals.errorMessage = 'Error Updating Book'
+            }
+            else{
+            locals.errorMessage = 'Error Creating Book' }}
+        response.render(`books/${form}`,locals)
     }catch{
         response.redirect('/books')
     }

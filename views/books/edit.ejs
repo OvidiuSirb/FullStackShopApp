@@ -1,0 +1,7 @@
+<h2>Edit Book</h2>
+<!-- removed enctype="multipart/form-data" from form because we're uploading just a single string which is a JSON object now -->
+<form action="/books/<%= book.id %>?_method=PUT" method="POST" >
+    <%- include('_form_fields') %> 
+    <a href="/books">Cancel</a>
+    <button type="submit">Update</button>
+</form>
